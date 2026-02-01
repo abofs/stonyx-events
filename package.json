@@ -14,7 +14,7 @@
     ".": "./src/main.js"
   },
   "scripts": {
-    "test": "qunit --require ./stonyx-bootstrap.cjs",
+    "test": "qunit",
     "prepublishOnly": "npm test"
   },
   "publishConfig": {
