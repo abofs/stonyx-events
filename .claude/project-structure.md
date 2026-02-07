@@ -419,3 +419,91 @@ The module follows TDD principles:
 ---
 
 This document is maintained by the Stonyx team and should be updated whenever architectural changes are made to the @stonyx/events module.
+
+---
+
+## NEW: Convenience Exports (v0.1.1-alpha.1+)
+
+**Status**: ✅ Fully Implemented
+
+The package now exports convenience functions that use the singleton instance directly, providing a cleaner API for consumers.
+
+### Exported Functions
+
+All convenience functions are re-exported from `src/main.js`:
+
+```javascript
+// Create singleton instance
+const events = new Events();
+
+// Export convenience functions that use the singleton
+export const setup = (...args) => events.setup(...args);
+export const subscribe = (...args) => events.subscribe(...args);
+export const once = (...args) => events.once(...args);
+export const unsubscribe = (...args) => events.unsubscribe(...args);
+export const emit = (...args) => events.emit(...args);
+export const clear = (...args) => events.clear(...args);
+export const reset = (...args) => events.reset(...args);
+```
+
+### Usage Comparison
+
+**Before (Class-based)**:
+```javascript
+import Events from '@stonyx/events';
+const events = new Events();
+events.setup(['myEvent']);
+events.subscribe('myEvent', handler);
+events.emit('myEvent', data);
+```
+
+**After (Convenience exports)**:
+```javascript
+import { setup, subscribe, emit } from '@stonyx/events';
+setup(['myEvent']);
+subscribe('myEvent', handler);
+emit('myEvent', data);
+```
+
+### Benefits
+
+1. **Cleaner API**: No need to instantiate Events class
+2. **Less Boilerplate**: Direct function imports
+3. **Singleton Pattern**: Still uses single instance internally
+4. **Backward Compatible**: Class-based usage still works
+5. **Better DX**: More intuitive for developers
+
+### Integration with Stonyx ORM
+
+The ORM now uses these convenience exports for its hooks system:
+
+```javascript
+// In stonyx-orm/src/main.js
+import { setup } from '@stonyx/events';
+setup(eventNames); // Register all hook events
+
+// In stonyx-orm/src/orm-request.js
+import { emit } from '@stonyx/events';
+await emit(`before:${operation}:${this.model}`, context);
+```
+
+### Migration Guide
+
+No breaking changes - both APIs work:
+
+**Option 1: Use convenience exports (recommended)**
+```javascript
+import { subscribe, emit } from '@stonyx/events';
+subscribe('myEvent', handler);
+emit('myEvent', data);
+```
+
+**Option 2: Use Events class (still supported)**
+```javascript
+import Events from '@stonyx/events';
+const events = new Events(); // Returns singleton
+events.subscribe('myEvent', handler);
+events.emit('myEvent', data);
+```
+
+---
