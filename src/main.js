@@ -165,3 +165,15 @@ class Events {
 }
 
 export default Events;
+
+// Create singleton instance
+const events = new Events();
+
+// Export convenience functions that use the singleton
+export const setup = (...args) => events.setup(...args);
+export const subscribe = (...args) => events.subscribe(...args);
+export const once = (...args) => events.once(...args);
+export const unsubscribe = (...args) => events.unsubscribe(...args);
+export const emit = (...args) => events.emit(...args);
+export const clear = (...args) => events.clear(...args);
+export const reset = (...args) => events.reset(...args);

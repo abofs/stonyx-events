@@ -1,5 +1,10 @@
 # @stonyx/events - Project Structure & Architecture
 
+## Detailed Guides
+
+- [Testing Guidelines](./testing.md) — Test structure, patterns, and coverage areas
+- [Improvements](./improvements.md) — Documented improvement opportunities
+
 ## Project Overview
 
 **@stonyx/events** is a lightweight pub/sub event system for the Stonyx framework. It provides a singleton-based event management system with error isolation, async support, and type-safe event registration.
@@ -46,24 +51,23 @@
 stonyx-events/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml              # GitHub Actions CI pipeline
+│       ├── ci.yml                # GitHub Actions CI pipeline
+│       └── publish.yml           # NPM publish workflow (alpha + stable)
 ├── .claude/
-│   ├── settings.local.json     # Claude Code permissions
-│   └── project-structure.md    # This file
-├── config/
-│   └── environment.js          # Environment configuration
+│   ├── project-structure.md      # This file
+│   ├── testing.md                # Testing guidelines
+│   └── improvements.md           # Improvement opportunities
 ├── src/
-│   └── main.js                 # Events class implementation
+│   └── main.js                   # Events class implementation
 ├── test/
 │   └── unit/
-│       └── events-test.js      # QUnit tests for Events
-├── .gitignore                  # Git ignore patterns
-├── .npmignore                  # NPM ignore patterns
-├── .nvmrc                      # Node version specification
-├── LICENSE.md                  # Apache 2.0 license
-├── README.md                   # User-facing documentation
-├── package.json                # NPM package configuration
-└── stonyx-bootstrap.cjs        # CommonJS bootstrap for testing
+│       └── events-test.js        # QUnit tests for Events
+├── .gitignore                    # Git ignore patterns
+├── .npmignore                    # NPM ignore patterns
+├── .nvmrc                        # Node version specification
+├── LICENSE.md                    # Apache 2.0 license
+├── README.md                     # User-facing documentation
+└── package.json                  # NPM package configuration
 ```
 
 ## Core Components Deep Dive
@@ -134,12 +138,8 @@ The Events class is the heart of the module, providing all pub/sub functionality
 
 ## Dependencies & Integration
 
-### Direct Dependencies
-
-**stonyx** (file:../stonyx)
-- Core Stonyx framework
-- Provides base configuration and bootstrapping
-- Required for module initialization
+### Production Dependencies
+None. This module has zero production dependencies.
 
 ### Dev Dependencies
 
@@ -148,7 +148,7 @@ The Events class is the heart of the module, providing all pub/sub functionality
 
 **qunit** (^2.24.1)
 - Testing framework
-- Runs via CLI with stonyx-bootstrap.cjs
+- Runs via `pnpm test` (which invokes `qunit`)
 
 **sinon** (^21.0.0)
 - Mocking/stubbing library
@@ -166,122 +166,35 @@ The Events class is the heart of the module, providing all pub/sub functionality
 ### Module System
 - ES Modules throughout
 - Default export for Events class
-- No named exports (single-purpose module)
+- Named convenience exports: `setup`, `subscribe`, `once`, `unsubscribe`, `emit`, `clear`, `reset`
 
 ### Error Handling
 - Validation errors throw immediately
 - Runtime errors in handlers are caught and logged
 - No silent failures
 
-### Logging
-- Environment variable: `EVENTS_LOG` (currently unused in implementation)
-- Configuration prepared in `config/environment.js`
-- Future: Could add debug logging for emit/subscribe events
-
 ### Naming Conventions
 - Event names: camelCase strings (e.g., 'userLogin', 'dataChange')
 - Method names: lowercase verbs (setup, subscribe, emit)
 - Private instance variables: None (all properties public for testing)
 
-## Testing Guidelines
-
-### Test Structure
-- All tests in `test/unit/events-test.js`
-- QUnit module: `[Unit] Events`
-- 18 test cases covering all functionality
-- Each test calls `events.reset()` before and after
-
-### Test Patterns
-
-**Singleton Isolation**
-```javascript
-const events = new Events();
-events.reset(); // Clear any previous state
-// ... test code ...
-events.reset(); // Clean up after test
-```
-
-**Async Testing**
-```javascript
-test('description', async function (assert) {
-  // Use async/await for emit()
-  await events.emit('event');
-  assert.ok(condition);
-});
-```
-
-**Error Suppression**
-```javascript
-const originalConsoleError = console.error;
-console.error = () => {}; // Suppress expected errors
-// ... test code ...
-console.error = originalConsoleError; // Restore
-```
-
-### Coverage Areas
-1. Event registration (setup)
-2. Subscription management (subscribe, unsubscribe)
-3. Event emission (emit)
-4. One-time subscriptions (once)
-5. Error isolation
-6. Async support
-7. Singleton behavior
-8. Edge cases (unregistered events, no subscribers)
-
-## Extension Points
-
-While the Events system is intentionally minimal, potential future enhancements include:
-
-### Event Priorities
-- Add priority levels for subscribers
-- Execute high-priority handlers first
-- Use case: Logging before business logic
-
-### Wildcard Events
-- Support pattern matching (e.g., 'user:*')
-- Subscribe to multiple events at once
-- Use case: Debugging, logging all events
-
-### Event History
-- Optional recording of emitted events
-- Replay functionality for debugging
-- Use case: Time-travel debugging, audit logs
-
-### Middleware
-- Pre/post-emit hooks
-- Event transformation pipeline
-- Use case: Validation, logging, metrics
-
-## Configuration Reference
-
-### Environment Variables
-
-**EVENTS_LOG**
-- Type: Boolean (truthy/falsy)
-- Default: `false`
-- Purpose: Enable debug logging (not yet implemented)
-- Usage: `EVENTS_LOG=true npm test`
-
-### config/environment.js
-
-```javascript
-{
-  log: EVENTS_LOG ?? false,  // Debug logging flag
-  logColor: '#888',           // Color for log output
-}
-```
-
-Currently, these config values are prepared but not used in the Events implementation. They provide a foundation for future debug logging features.
-
 ## Package Exports
 
-### Main Export
+### Default Export
 
 ```javascript
 import Events from '@stonyx/events';
 ```
 
-The package exports a single default export: the Events class.
+The Events class.
+
+### Named Convenience Exports
+
+```javascript
+import { setup, subscribe, once, unsubscribe, emit, clear, reset } from '@stonyx/events';
+```
+
+All convenience functions use a singleton Events instance internally, providing a cleaner API without needing to instantiate the class.
 
 ### Usage Pattern
 
@@ -304,59 +217,14 @@ events.emit('userLogin', { id: 1, name: 'Alice' });
 await events.emit('userLogin', { id: 1, name: 'Alice' });
 ```
 
-## Development Workflow
+### Convenience Exports Usage
 
-### Local Development
-
-1. **Install dependencies**
-   ```bash
-   cd /Users/mstonepc/Repos/abofs
-   ./linker.sh local  # Link all local Stonyx modules
-   cd stonyx-events
-   npm install
-   ```
-
-2. **Run tests**
-   ```bash
-   npm test
-   ```
-
-3. **Make changes**
-   - Edit `src/main.js` for implementation
-   - Edit `test/unit/events-test.js` for tests
-   - Follow TDD: Write failing test, implement feature, verify
-
-### Test-Driven Development
-
-The module follows TDD principles:
-1. Write a failing test for new functionality
-2. Implement the minimum code to pass the test
-3. Refactor while keeping tests green
-4. Ensure all tests pass before committing
-
-### CI/CD Pipeline
-
-**GitHub Actions** (`.github/workflows/ci.yml`)
-- Triggers on PRs to `dev` and `main` branches
-- Uses pnpm for package management
-- Runs `pnpm test` to verify all tests pass
-- Cancels previous runs on new commits
-
-### Publishing Workflow
-
-1. **Version bump**
-   ```bash
-   npm version patch|minor|major
-   ```
-
-2. **Publish to NPM**
-   ```bash
-   npm publish
-   ```
-
-3. **Update dependents**
-   - Update `@stonyx/orm` to use published version
-   - Update other modules as needed
+```javascript
+import { setup, subscribe, emit } from '@stonyx/events';
+setup(['myEvent']);
+subscribe('myEvent', handler);
+emit('myEvent', data);
+```
 
 ## Common Pitfalls & Gotchas
 
@@ -385,29 +253,6 @@ The module follows TDD principles:
 - **Solution**: Use different function instances for multiple subscriptions
 - **Note**: This is by design to prevent accidental duplicate subscriptions
 
-## Future Enhancement Opportunities
-
-### Performance Optimizations
-- Lazy initialization of event subscriber sets
-- Debouncing/throttling for high-frequency events
-- Event batching for bulk updates
-
-### Developer Experience
-- TypeScript definitions for type-safe event names and payloads
-- Debug mode with detailed logging
-- Event visualization/monitoring tools
-
-### Advanced Features
-- Event namespacing (e.g., 'user:login:success')
-- Event bubbling/capturing (DOM-like event propagation)
-- Async middleware pipeline
-- Event replay for debugging
-
-### Integration
-- Automatic event logging to @stonyx/logger (when it exists)
-- Metrics/telemetry integration
-- Event persistence for audit trails
-
 ## Related Resources
 
 - [Stonyx Framework](https://github.com/abofs/stonyx)
@@ -415,7 +260,3 @@ The module follows TDD principles:
 - [Sinon.js Documentation](https://sinonjs.org/)
 - [Node.js ES Modules](https://nodejs.org/api/esm.html)
 - [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0)
-
----
-
-This document is maintained by the Stonyx team and should be updated whenever architectural changes are made to the @stonyx/events module.
