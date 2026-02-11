@@ -21,7 +21,7 @@ on:
   # Auto-publish alpha on PR
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main, dev]
+    branches: [main]
 
   # Auto-publish stable on merge to main
   push:
