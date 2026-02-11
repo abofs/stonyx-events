@@ -101,14 +101,11 @@ events.emit('myEvent', data);
 
 ## How It Works
 
-The Events class provides a lightweight pub/sub system with the following features:
-
-- **Event Registration**: Events must be registered with `setup()` before use, ensuring type safety
-- **Singleton Pattern**: Single Events instance shared across your application
-- **Async Support**: Event handlers can be async functions
-- **Error Isolation**: Errors in one handler don't affect others or prevent other handlers from running
-- **One-time Subscriptions**: Use `once()` for handlers that should only fire once
-- **Unsubscribe**: All subscriptions return an unsubscribe function for cleanup
+- The `Events` class uses a static `instance` property to enforce a singleton -- every `new Events()` returns the same object
+- Event names are held in a `registeredEvents` Set; subscribing to an unregistered name throws immediately, catching typos early
+- Subscribers are stored in a `Map<string, Set<Function>>`, so duplicate function references are automatically deduplicated
+- `emit()` is async: it maps every subscriber into a `Promise`, wraps each in a try/catch for error isolation, and awaits them all with `Promise.all()`
+- `once()` wraps the callback in a self-removing wrapper that calls `unsubscribe` before invoking the original handler
 
 ## License
 

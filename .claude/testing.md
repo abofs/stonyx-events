@@ -3,7 +3,7 @@
 ## Test Structure
 - All tests in `test/unit/events-test.js`
 - QUnit module: `[Unit] Events`
-- 18 test cases covering all functionality
+- 17 test cases covering all functionality
 - Each test calls `events.reset()` before and after
 
 ## Test Patterns
