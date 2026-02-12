@@ -3,7 +3,7 @@
   "keywords": [
     "stonyx-module"
   ],
-  "version": "0.1.1-alpha.1",
+  "version": "0.1.1-beta.2",
   "description": "Lightweight pub/sub event system for the Stonyx framework",
   "main": "src/main.js",
   "type": "module",
@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/abofs/stonyx-events#readme",
   "devDependencies": {
-    "@stonyx/utils": "0.2.3-beta.2",
+    "@stonyx/utils": "0.2.3-beta.3",
     "qunit": "^2.24.1",
     "sinon": "^21.0.0"
   },
