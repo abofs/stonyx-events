@@ -2,7 +2,7 @@
 
 ## Detailed Guides
 
-- [Testing Guidelines](./testing.md) — Test structure, patterns, and coverage areas
+- [Testing Guidelines](../.claude/testing.md) — Test structure, patterns, and coverage areas
 - [Improvements](./improvements.md) — Documented improvement opportunities
 
 ## Project Overview
@@ -54,9 +54,13 @@ stonyx-events/
 │       ├── ci.yml                # GitHub Actions CI pipeline
 │       └── publish.yml           # NPM publish workflow (alpha + stable)
 ├── .claude/
+│   ├── CLAUDE.md                 # Agent entry point
+│   └── testing.md                # Testing guidelines
+├── docs/
+│   ├── index.md                  # Documentation entry point
 │   ├── project-structure.md      # This file
-│   ├── testing.md                # Testing guidelines
-│   └── improvements.md           # Improvement opportunities
+│   ├── improvements.md           # Improvement opportunities
+│   └── release.md                # Release instructions
 ├── src/
 │   └── main.js                   # Events class implementation
 ├── test/
