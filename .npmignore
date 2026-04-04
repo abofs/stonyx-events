@@ -1,5 +1,10 @@
-test/
-.nvmrc
-
-# git
 .git
+.env
+.npmrc
+.claude/
+.github/
+test/
+scripts/
+*.log
+.nvmrc
+.gitignore
