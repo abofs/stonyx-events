@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@stonyx/utils':
-        specifier: 0.2.3-beta.11
-        version: 0.2.3-beta.11
+        specifier: 0.2.3-beta.12
+        version: 0.2.3-beta.12
       qunit:
         specifier: ^2.24.1
         version: 2.25.0
@@ -29,8 +29,8 @@ packages:
   '@sinonjs/samsam@8.0.3':
     resolution: {integrity: sha512-hw6HbX+GyVZzmaYNh82Ecj1vdGZrqVIn/keDTg63IgAwiQPO+xCz99uG6Woqgb4tM0mUiFENKZ4cqd7IX94AXQ==}
 
-  '@stonyx/utils@0.2.3-beta.11':
-    resolution: {integrity: sha512-UhBdbO72j2jmV9pCLmqYXIdaf01YiNdbbu5tuEIrtzxpfqWW9m4B03kJEH7dl7tI3qaVQbi3IiC3w6EnVCo6bg==}
+  '@stonyx/utils@0.2.3-beta.12':
+    resolution: {integrity: sha512-P5tPlujPgMVRSBjUMRf1IBjLju8a54dPtZur/k33t3p88N2QCJ8FtGCAfPJX1ZloeEH8s+fgS/ZHtVlKkk8Z/A==}
 
   commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
@@ -92,7 +92,7 @@ snapshots:
       '@sinonjs/commons': 3.0.1
       type-detect: 4.1.0
 
-  '@stonyx/utils@0.2.3-beta.11': {}
+  '@stonyx/utils@0.2.3-beta.12': {}
 
   commander@7.2.0: {}
 
