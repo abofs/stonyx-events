@@ -1,3 +1,7 @@
+[![CI](https://github.com/abofs/stonyx-events/actions/workflows/ci.yml/badge.svg)](https://github.com/abofs/stonyx-events/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@stonyx/events.svg)](https://www.npmjs.com/package/@stonyx/events)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # @stonyx/events
 
 A lightweight pub/sub event system for the Stonyx framework. Provides singleton event management with error isolation, async support, and type-safe event registration.
