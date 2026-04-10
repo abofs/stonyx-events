@@ -4,6 +4,9 @@ config/environment.js
 .vscode/*
 *.vsix
 *DS_Store*
+dist/
+dist-test/
+.ts-migration-log.json
 
 # npm auth (never commit tokens)
 .npmrc
