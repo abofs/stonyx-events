@@ -49,7 +49,8 @@ class Events {
       throw new Error('Callback must be a function');
     }
 
-    const subscribers = this.events.get(event)!;
+    const subscribers = this.events.get(event);
+    if (!subscribers) throw new Error(`Event "${event}" subscribers not found in events Map`);
     subscribers.add(callback);
 
     // Return unsubscribe function
@@ -78,8 +79,8 @@ class Events {
       return;
     }
 
-    const subscribers = this.events.get(event)!;
-    subscribers.delete(callback);
+    const subscribers = this.events.get(event);
+    if (subscribers) subscribers.delete(callback);
   }
 
   async emit(event: string, ...args: unknown[]): Promise<void> {
@@ -87,7 +88,8 @@ class Events {
       return;
     }
 
-    const subscribers = this.events.get(event)!;
+    const subscribers = this.events.get(event);
+    if (!subscribers) return;
 
     // Execute all handlers with error isolation
     const promises = Array.from(subscribers).map(async (callback) => {
@@ -102,9 +104,7 @@ class Events {
   }
 
   clear(event: string): void {
-    if (this.events.has(event)) {
-      this.events.get(event)!.clear();
-    }
+    this.events.get(event)?.clear();
   }
 
   reset(): void {
