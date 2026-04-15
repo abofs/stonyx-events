@@ -1,5 +1,5 @@
 import QUnit from 'qunit';
-import Events from '../../src/main.js';
+import Events, { type EventCallback } from '../../src/main.js';
 
 const { module, test } = QUnit;
 
@@ -23,13 +23,13 @@ test('Events: setup() throws on invalid input', function (assert) {
   events.reset();
 
   assert.throws(
-    () => events.setup('not-an-array'),
+    () => events.setup('not-an-array' as unknown as string[]),
     /setup\(\) requires an array/,
     'Throws error for non-array input'
   );
 
   assert.throws(
-    () => events.setup([123]),
+    () => events.setup([123 as unknown as string]),
     /Event names must be strings/,
     'Throws error for non-string event names'
   );
@@ -49,7 +49,7 @@ test('Events: subscribe() adds callbacks', function (assert) {
   events.subscribe('testEvent', callback1);
   events.subscribe('testEvent', callback2);
 
-  const subscribers = events.events.get('testEvent');
+  const subscribers = events.events.get('testEvent')!;
   assert.strictEqual(subscribers.size, 2, 'Two callbacks subscribed');
   assert.ok(subscribers.has(callback1), 'callback1 is subscribed');
   assert.ok(subscribers.has(callback2), 'callback2 is subscribed');
@@ -77,7 +77,7 @@ test('Events: subscribe() throws for non-function callbacks', function (assert) 
   events.setup(['testEvent']);
 
   assert.throws(
-    () => events.subscribe('testEvent', 'not-a-function'),
+    () => events.subscribe('testEvent', 'not-a-function' as unknown as EventCallback),
     /Callback must be a function/,
     'Throws error for non-function callback'
   );
@@ -93,7 +93,7 @@ test('Events: emit() calls all subscribed callbacks', async function (assert) {
 
   let call1 = false;
   let call2 = false;
-  let receivedData = null;
+  let receivedData: unknown = null;
 
   events.subscribe('testEvent', (data) => {
     call1 = true;
