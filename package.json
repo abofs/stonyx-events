@@ -20,9 +20,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "build:test": "tsc -p tsconfig.test.json",
-    "test": "pnpm build && pnpm build:test && qunit 'dist-test/test/**/*.js'",
-    "prepublishOnly": "npm test"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "node --import tsx node_modules/qunit/bin/qunit.js 'test/**/*-test.ts'",
+    "prepublishOnly": "npm run build && npm test"
   },
   "publishConfig": {
     "access": "public",
@@ -47,7 +47,7 @@
     "@types/qunit": "^2.19.13",
     "qunit": "^2.24.1",
     "sinon": "^21.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
-  },
-  "dependencies": {}
+  }
 }
