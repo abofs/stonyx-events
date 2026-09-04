@@ -89,8 +89,8 @@ permanent; only its metadata can change.
 
 ## Affected versions
 
-Verified 2026-09-04 by downloading all 68 published `@stonyx/events` tarballs from
-`dist.tarball` and running `tar tzf | grep -c '^package/\.git/'` against each.
+Verified 2026-09-04 by downloading all 68 `@stonyx/events` tarballs published as of that
+measurement from `dist.tarball` and running `tar tzf | grep -c '^package/\.git/'` against each.
 Exactly one returned a non-zero count. The other 67 returned 0.
 
 That set is exactly equal to the set already carrying a `deprecated` field — no
@@ -166,6 +166,35 @@ Only one version is affected here, so the semver-range hazard that forces
 version-by-version application in `@stonyx/cron` does not bite — but the script still
 applies from an explicit list, and `--check` asserts the deprecated count is still
 exactly 1 afterwards, so an accidental range cannot pass silently.
+
+### Rolling back
+
+**Do not run `npm deprecate <pkg>@<version> ""`.** The empty-string form does not restore
+the previous message — it *un-deprecates* the version, deleting the `deprecated` field
+outright. That is the worst available outcome for this package specifically: `0.1.0` is
+the only affected version, the only non-prerelease `@stonyx/events` has ever published,
+and what the `latest` dist-tag points at. Clearing its `deprecated` field removes the only
+warning on the exact version an unpinned `npm install @stonyx/events` resolves to, leaving
+a `.git/config`-bearing tarball shipping silently. That is strictly worse than either the
+original text or the corrected one, and it is the first thing an operator reaching for an
+undo will find in the `npm deprecate` docs.
+
+The correct rollback is to **re-apply the original deprecation string**. That string is
+quoted verbatim under [The defect](#the-defect) above; for `@stonyx/events` the rollback
+value is:
+
+```
+This version inadvertently included .git/config. Please upgrade to the latest version.
+```
+
+Apply it to `0.1.0` from the explicit version list, never as a semver range. Afterwards
+`--check` is *expected* to exit 1, reporting `0.1.0` as `still says 'the latest version'`;
+that is the pre-remediation red state restored, not a failed rollback.
+
+Rolling back reinstates the closed loop this remediation exists to fix, so it is a last
+resort rather than a routine undo. The change is registry metadata only and is reversible
+in both directions — there is nothing lost by leaving the corrected text in place while a
+concern is investigated.
 
 ## Verification
 

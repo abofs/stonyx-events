@@ -44,8 +44,8 @@ set -euo pipefail
 PKG="@stonyx/events"
 
 # The affected set: every published version whose tarball contains at least one
-# `package/.git/` entry. Verified 2026-09-04 by downloading all 68 published
-# tarballs and running `tar tzf | grep -c '^package/\.git/'` against each.
+# `package/.git/` entry. Verified 2026-09-04 by downloading all 68 tarballs
+# published as of that measurement and running `tar tzf | grep -c '^package/\.git/'` against each.
 # Result: exactly one returned a non-zero count; the other 67 returned 0.
 # This set is also exactly equal to the set already carrying a `deprecated`
 # field, so the rewrite neither widens nor narrows the deprecation.
