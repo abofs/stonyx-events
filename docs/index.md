@@ -8,3 +8,4 @@ A lightweight pub/sub event system for the Stonyx framework. Provides singleton 
 - [Project structure](project-structure.md) -- architecture, file layout, and code patterns
 - [Improvements](improvements.md) -- documented improvement opportunities
 - [Release instructions](release.md)
+- [Deprecation remediation](deprecation-remediation.md) -- corrective deprecation text for the published version that shipped `.git/config`
