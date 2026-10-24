@@ -21,6 +21,10 @@ A lightweight pub/sub event system for the Stonyx framework. Provides singleton 
 npm install @stonyx/events
 ```
 
+## Canonical usage
+
+Runnable, tested samples of every export live in [`test/sample/`](https://github.com/abofs/stonyx-events/tree/dev/test/sample). They import `@stonyx/events` exactly as a consumer does, and the test suite runs them against the built package.
+
 ## Usage
 
 ### Option 1: Convenience Functions (Recommended)
