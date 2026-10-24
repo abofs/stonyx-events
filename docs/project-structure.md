@@ -70,7 +70,9 @@ stonyx-events/
 │   │   ├── class.ts              # new Events(), instance methods, shared singleton
 │   │   └── convenience.ts        # setup/subscribe/once/unsubscribe/emit/clear/reset
 │   └── unit/
-│       └── events-test.ts        # QUnit tests for Events
+│       ├── events-test.ts        # QUnit tests for Events
+│       ├── sample-test.ts        # Runs every sample in test/sample/ and asserts what its handlers observed
+│       └── sample-surface-test.ts # Fails if an export, sample, or import specifier falls outside the sample contract
 ├── .gitignore                    # Git ignore patterns
 ├── .npmignore                    # NPM ignore patterns
 ├── .nvmrc                        # Node version specification
