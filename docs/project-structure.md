@@ -191,8 +191,8 @@ None. This module has zero production dependencies.
 
 - Samples import `@stonyx/events`, never `src/`, so they exercise the built `dist/` entry a consumer installs. Each sample exports functions only and has no top-level side effects.
 - `test/unit/sample-test.ts` runs every sample and asserts what its handlers observed.
-- `test/unit/sample-surface-test.ts` fails if a runtime export is not imported by any sample, if a sample is not imported by any `*-test.ts`, or if an export subpath stops resolving to `dist/`. It reads imports from the TypeScript syntax tree, so an import in a comment or string does not count. It reads `package.json` from the working directory, so it runs unchanged in other Stonyx library repos, including ones that run tests from compiled output.
-- Type-only exports (`EventCallback`) are checked by `pnpm typecheck`, which `pnpm test` runs.
+- `test/unit/sample-surface-test.ts` fails if a runtime export is not imported by any sample, if a sample is not imported by any `*-test.ts`, if a sample imports an unexported subpath of `@stonyx/events` or a relative path outside `test/sample/`, or if an export subpath stops resolving to `dist/`. It counts only the imports left after TypeScript compiles the file, so `import type`, `import { type X }`, an unused import, and an import in a comment or string do not count. It reads `package.json` from the working directory, so it runs unchanged in other Stonyx library repos, including ones that run tests from compiled output.
+- `pnpm typecheck`, which `pnpm test` runs, type-checks the type imports samples make (such as `EventCallback`). Nothing requires a sample to import each type-only export.
 - Adding an export means adding it to a sample.
 
 ## Package Exports
