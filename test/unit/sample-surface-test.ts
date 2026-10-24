@@ -9,25 +9,31 @@
  *  3. every sample file is imported by some *-test.ts, so no sample goes
  *     unexecuted.
  *
+ * Imports are read from the TypeScript syntax tree, not from raw text, so an
+ * import inside a comment or a string literal credits nothing.
+ *
  * Limits, covered elsewhere: (2) proves a name is imported, not called (the
  * behavioural sample tests assert on what each call produced); it sees runtime
- * exports only, so type-only exports are not checked; and it counts top-level
- * exports, not class methods.
+ * exports only, so type-only exports are left to `pnpm typecheck`; and it
+ * counts top-level exports, not class methods.
  *
- * Package-agnostic: it reads the name and exports map from package.json, so it
- * can be copied unchanged into other Stonyx library repos.
+ * Package-agnostic: it reads the name and exports map from package.json and
+ * locates the repo by the working directory, not by this file's location, so
+ * it can be copied unchanged into a repo that runs tests from compiled output
+ * (e.g. dist-test/). Run it from the repo root, as `pnpm test` does.
  */
 import QUnit from 'qunit';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const { module, test } = QUnit;
 
 type ExportTarget = string | { default?: string; import?: string };
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = process.cwd();
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
   name: string;
   exports: Record<string, ExportTarget>;
@@ -63,30 +69,45 @@ function resolveAsConsumer(specifier: string): string {
   return fileURLToPath(url);
 }
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+/** The import declarations of a file, parsed rather than pattern-matched, so comments and strings are not imports. */
+function importsOf(file: string): ts.ImportDeclaration[] {
+  const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest);
+  return source.statements.filter(ts.isImportDeclaration);
 }
 
-/** Runtime export names named in `import ... from '<specifier>'` clauses (type-only imports excluded). */
-function importedNames(source: string, specifier: string): Set<string> {
-  const names = new Set<string>();
-  const clause = new RegExp(`import\\s+(?!type\\s)([^;]*?)\\s+from\\s+['"]${escapeRegExp(specifier)}['"]`, 'g');
+function specifierOf(declaration: ts.ImportDeclaration): string {
+  return (declaration.moduleSpecifier as ts.StringLiteral).text;
+}
 
-  for (const [, body] of source.matchAll(clause)) {
-    const braceAt = body.indexOf('{');
-    const head = (braceAt === -1 ? body : body.slice(0, braceAt)).replace(/,\s*$/, '').trim();
-    if (head && !head.startsWith('*')) names.add('default');
+/**
+ * Runtime export names a file imports from `specifier`. Type-only imports are
+ * excluded; a namespace import (`import * as ns`) credits nothing, so it fails
+ * closed rather than crediting every export.
+ */
+function importedNames(file: string, specifier: string): string[] {
+  const names: string[] = [];
 
-    if (braceAt !== -1) {
-      for (const part of body.slice(braceAt + 1, body.indexOf('}')).split(',')) {
-        const item = part.trim();
-        if (!item || item.startsWith('type ')) continue;
-        names.add(item.split(/\s+as\s+/)[0].trim());
+  for (const declaration of importsOf(file)) {
+    const clause = declaration.importClause;
+    if (specifierOf(declaration) !== specifier || !clause || clause.isTypeOnly) continue;
+    if (clause.name) names.push('default');
+
+    if (clause.namedBindings && ts.isNamedImports(clause.namedBindings)) {
+      for (const element of clause.namedBindings.elements) {
+        if (!element.isTypeOnly) names.push((element.propertyName ?? element.name).text);
       }
     }
   }
 
   return names;
+}
+
+/** Files a test imports by relative path, resolved to their .ts source. */
+function importedFiles(file: string): string[] {
+  return importsOf(file)
+    .map(specifierOf)
+    .filter((specifier) => specifier.startsWith('.'))
+    .map((specifier) => resolve(dirname(file), specifier).replace(/\.js$/, '.ts'));
 }
 
 module('[Unit] Sample surface', function () {
@@ -104,11 +125,9 @@ module('[Unit] Sample surface', function () {
   });
 
   test('every runtime export is imported by a sample', async function (assert) {
-    const sources = sampleFiles.map((file) => readFileSync(file, 'utf8'));
-
     for (const { specifier } of subpaths) {
       const exported = Object.keys(await import(specifier));
-      const imported = new Set(sources.flatMap((source) => [...importedNames(source, specifier)]));
+      const imported = new Set(sampleFiles.flatMap((file) => importedNames(file, specifier)));
       const missing = exported.filter((name) => !imported.has(name));
 
       assert.ok(exported.length > 0, `${specifier} has runtime exports`);
@@ -117,12 +136,11 @@ module('[Unit] Sample surface', function () {
   });
 
   test('every sample is imported by a test', function (assert) {
-    const tests = testFiles.map((file) => readFileSync(file, 'utf8'));
+    const imported = new Set(testFiles.flatMap(importedFiles));
 
     for (const file of sampleFiles) {
-      const rel = relative(sampleDir, file).split(sep).join('/').replace(/\.ts$/, '.js');
-      const pattern = new RegExp(`from\\s+['"][^'"]*/sample/${escapeRegExp(rel)}['"]`);
-      assert.ok(tests.some((source) => pattern.test(source)), `test/sample/${rel.replace(/\.js$/, '.ts')} is imported by a *-test.ts`);
+      const rel = relative(root, file).split(sep).join('/');
+      assert.ok(imported.has(file), `${rel} is imported by a *-test.ts`);
     }
   });
 });
