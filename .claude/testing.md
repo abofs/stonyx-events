@@ -42,3 +42,8 @@ console.error = originalConsoleError; // Restore
 6. Async support
 7. Singleton behavior
 8. Edge cases (unregistered events, no subscribers)
+
+## Canonical Usage Samples
+- `test/sample/*.ts` are the canonical usage reference linked from the README. They import `@stonyx/events` (never `src/`) and export functions with no top-level side effects.
+- `test/unit/sample-test.ts` runs each sample and asserts what its handlers observed. Samples resolve the built `dist/` entry, so `pnpm test` runs `pnpm build` first.
+- `test/unit/sample-surface-test.ts` fails if a runtime export is not imported by any sample, if a sample is not imported by any `*-test.ts`, or if an export subpath stops resolving to `dist/`. Adding an export means adding it to a sample.
