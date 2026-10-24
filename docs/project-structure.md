@@ -64,7 +64,12 @@ stonyx-events/
 ├── src/
 │   └── main.js                   # Events class implementation
 ├── test/
+│   ├── sample/                   # Canonical usage samples, linked from the README
+│   │   ├── class.ts              # new Events(), instance methods, shared singleton
+│   │   └── convenience.ts        # setup/subscribe/once/unsubscribe/emit/clear/reset
 │   └── unit/
+│       ├── sample-surface-test.ts # Guard: every export is sampled, every sample is run
+│       ├── sample-test.ts        # Runs each sample and asserts what it observed
 │       └── events-test.js        # QUnit tests for Events
 ├── .gitignore                    # Git ignore patterns
 ├── .npmignore                    # NPM ignore patterns
@@ -152,7 +157,7 @@ None. This module has zero production dependencies.
 
 **qunit** (^2.24.1)
 - Testing framework
-- Runs via `pnpm test` (which invokes `qunit`)
+- Runs via `pnpm test`, which first runs `pnpm typecheck` (build `dist/`, then type-check `src/` and `test/`), then QUnit through tsx
 
 **sinon** (^21.0.0)
 - Mocking/stubbing library
@@ -181,6 +186,16 @@ None. This module has zero production dependencies.
 - Event names: camelCase strings (e.g., 'userLogin', 'dataChange')
 - Method names: lowercase verbs (setup, subscribe, emit)
 - Private instance variables: None (all properties public for testing)
+
+## Canonical Usage Samples
+
+`test/sample/` is the canonical usage reference; the README links it by absolute GitHub URL because `test/` is not in the published tarball.
+
+- Samples import `@stonyx/events`, never `src/`, so they exercise the built `dist/` entry a consumer installs. Each sample exports functions only and has no top-level side effects.
+- `test/unit/sample-test.ts` runs every sample and asserts what its handlers observed.
+- `test/unit/sample-surface-test.ts` fails if a runtime export is not imported by any sample, if a sample is not imported by any `*-test.ts`, or if an export subpath stops resolving to `dist/`. It reads imports from the TypeScript syntax tree, so an import in a comment or string does not count. It reads `package.json` from the working directory, so it runs unchanged in other Stonyx library repos, including ones that run tests from compiled output.
+- Type-only exports (`EventCallback`) are checked by `pnpm typecheck`, which `pnpm test` runs.
+- Adding an export means adding it to a sample.
 
 ## Package Exports
 
