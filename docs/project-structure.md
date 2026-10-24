@@ -2,8 +2,7 @@
 
 ## Detailed Guides
 
-- [Testing Guidelines](../.claude/testing.md) — Test structure, patterns, and coverage areas
-- [Improvements](./improvements.md) — Documented improvement opportunities
+- [Testing Guidelines](./testing.md) — Test structure, patterns, and coverage areas
 
 ## Project Overview
 
@@ -52,20 +51,23 @@ stonyx-events/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                # GitHub Actions CI pipeline
-│       └── publish.yml           # NPM publish workflow (alpha + stable)
+│       ├── publish.yml           # NPM publish workflow (shared stonyx-workflows pipeline)
+│       └── security-audit.yml    # Dependency audit
 ├── .claude/
-│   ├── CLAUDE.md                 # Agent entry point
-│   └── testing.md                # Testing guidelines
+│   └── CLAUDE.md                 # Pointer to docs/index.md
 ├── docs/
 │   ├── index.md                  # Documentation entry point
 │   ├── project-structure.md      # This file
-│   ├── improvements.md           # Improvement opportunities
-│   └── release.md                # Release instructions
+│   ├── testing.md                # Testing guidelines
+│   ├── release.md                # Release instructions
+│   └── deprecation-remediation.md # Runbook for the published 0.1.0 deprecation text
+├── scripts/
+│   └── deprecation-remediation.sh # --check / --apply for that runbook
 ├── src/
-│   └── main.js                   # Events class implementation
+│   └── main.ts                   # Events class implementation
 ├── test/
 │   └── unit/
-│       └── events-test.js        # QUnit tests for Events
+│       └── events-test.ts        # QUnit tests for Events
 ├── .gitignore                    # Git ignore patterns
 ├── .npmignore                    # NPM ignore patterns
 ├── .nvmrc                        # Node version specification
@@ -76,7 +78,7 @@ stonyx-events/
 
 ## Core Components Deep Dive
 
-### Events Class (`src/main.js`)
+### Events Class (`src/main.ts`)
 
 The Events class is the heart of the module, providing all pub/sub functionality.
 
@@ -147,7 +149,7 @@ None. This module has zero production dependencies.
 
 ### Dev Dependencies
 
-**@stonyx/utils** (file:../stonyx-utils)
+**@stonyx/utils**
 - Utility functions (currently unused but available)
 
 **qunit** (^2.24.1)
@@ -157,6 +159,10 @@ None. This module has zero production dependencies.
 **sinon** (^21.0.0)
 - Mocking/stubbing library
 - Available for advanced testing scenarios
+
+### Stonyx Loading
+
+The package carries the `stonyx-module` keyword without `stonyx-async`, so the Stonyx loader does not import or initialize it; there is no `init()`. Consumers import it directly, and it works without Stonyx running.
 
 ### Modules That Depend on @stonyx/events
 
@@ -256,6 +262,17 @@ emit('myEvent', data);
 - **Issue**: Adding the same callback function twice only subscribes once
 - **Solution**: Use different function instances for multiple subscriptions
 - **Note**: This is by design to prevent accidental duplicate subscriptions
+
+### Behaviour at the Boundaries
+- `emit()` never rejects: handler errors are caught, logged with `console.error`, and swallowed. Awaiting it waits for handlers; it does not surface their errors
+- Handlers start in subscription order (`Set` insertion order) and run concurrently; order is not a documented contract
+- `once()` subscribes a wrapper that unsubscribes itself before calling the callback, so a `once` handler that emits the same event does not fire again. To cancel a `once` early, call the function `once()` returns; `unsubscribe(event, callback)` with the original callback does not match the wrapper
+- `unsubscribe()` on an unknown event or callback is a no-op
+- `clear(event)` keeps the registration, so `subscribe` works afterwards without another `setup()`
+- `reset()` clears subscribers and registrations; it does not replace the singleton instance
+- `setup()` is additive: a second call adds names, it does not replace earlier ones
+- The convenience functions and `new Events()` share one singleton, so the two APIs interoperate
+- Payloads are untyped: `EventCallback` is `(...args: unknown[]) => void | Promise<void>`, so handlers narrow their own arguments
 
 ## Related Resources
 
