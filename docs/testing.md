@@ -1,10 +1,11 @@
 # @stonyx/events - Testing Guidelines
 
 ## Test Structure
-- All tests in `test/unit/events-test.js`
+- Unit tests in `test/unit/events-test.ts`
 - QUnit module: `[Unit] Events`
 - 17 test cases covering all functionality
 - Each test calls `events.reset()` before and after
+- No Stonyx setup is needed: the module has no config and no lifecycle hooks
 
 ## Test Patterns
 
