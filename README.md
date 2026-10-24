@@ -118,3 +118,7 @@ events.emit('myEvent', data);
 ## License
 
 Apache — do what you want, just keep attribution.
+
+```js
+import { NoSuchExport } from '@stonyx/events';
+```
