@@ -48,7 +48,7 @@ Do not sync this section to cron's; they are kept accurate rather than identical
 
 ## The decision
 
-Per the CTO decision on issue #23: **correct the deprecation text only. Do not
+Per the decision recorded on issue #23: **correct the deprecation text only. Do not
 advance the `latest` dist-tag.**
 
 `latest` is vestigial in this org — consumers track the beta line via
