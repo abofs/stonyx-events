@@ -64,12 +64,10 @@ stonyx-events/
 ├── src/
 │   └── main.js                   # Events class implementation
 ├── test/
-│   ├── sample/                   # Canonical usage samples, linked from the README
+│   ├── sample/                   # Canonical usage samples (README link); run by unit/sample-test.ts, guarded by unit/sample-surface-test.ts
 │   │   ├── class.ts              # new Events(), instance methods, shared singleton
 │   │   └── convenience.ts        # setup/subscribe/once/unsubscribe/emit/clear/reset
 │   └── unit/
-│       ├── sample-surface-test.ts # Guard: every export is sampled, every sample is run
-│       ├── sample-test.ts        # Runs each sample and asserts what it observed
 │       └── events-test.js        # QUnit tests for Events
 ├── .gitignore                    # Git ignore patterns
 ├── .npmignore                    # NPM ignore patterns
