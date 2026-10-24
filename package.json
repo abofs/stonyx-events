@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
-    "test": "node --import tsx node_modules/qunit/bin/qunit.js 'test/**/*-test.ts'",
+    "test": "pnpm build && node --import tsx node_modules/qunit/bin/qunit.js 'test/**/*-test.ts'",
     "prepublishOnly": "npm run build && npm test"
   },
   "publishConfig": {
