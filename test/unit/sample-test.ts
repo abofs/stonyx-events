@@ -1,5 +1,4 @@
 import QUnit from 'qunit';
-import sinon from 'sinon';
 import Events, { reset } from '@stonyx/events';
 import {
   subscribeAndUnsubscribe,
@@ -18,10 +17,7 @@ const { module, test } = QUnit;
 // from the one src/ tests use. Reset it around every sample.
 module('[Unit] Samples', function (hooks) {
   hooks.beforeEach(() => reset());
-  hooks.afterEach(() => {
-    reset();
-    sinon.restore();
-  });
+  hooks.afterEach(() => reset());
 
   module('convenience functions', function () {
     test('subscribe() returns a function that stops delivery', async function (assert) {
@@ -41,11 +37,20 @@ module('[Unit] Samples', function (hooks) {
     });
 
     test('a throwing handler is logged and does not stop the others', async function (assert) {
-      const consoleError = sinon.stub(console, 'error');
+      const logged: unknown[][] = [];
+      const originalError = console.error;
+      console.error = (...args: unknown[]) => {
+        logged.push(args);
+      };
 
-      assert.deepEqual(await isolateHandlerErrors(), ['healthy handler']);
-      assert.strictEqual(consoleError.callCount, 1, 'the failure was logged once');
-      assert.ok(String(consoleError.firstCall.args[0]).includes('"dataChange"'), 'log names the event');
+      try {
+        assert.deepEqual(await isolateHandlerErrors(), ['healthy handler']);
+      } finally {
+        console.error = originalError;
+      }
+
+      assert.strictEqual(logged.length, 1, 'the failure was logged once');
+      assert.ok(String(logged[0][0]).includes('"dataChange"'), 'log names the event');
     });
 
     test('clear() empties an event but keeps it registered', async function (assert) {
