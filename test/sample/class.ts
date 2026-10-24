@@ -5,7 +5,7 @@
  * functions, so instances and convenience functions share one registry.
  * Nothing runs at import time.
  */
-import Events from '@stonyx/events';
+import Events, { emit } from '@stonyx/events';
 import type { EventCallback } from '@stonyx/events';
 
 /** The instance methods mirror the convenience functions one-for-one. */
@@ -45,7 +45,10 @@ export async function useInstanceMethods(): Promise<string[]> {
   return seen;
 }
 
-/** Two instances are the same object, so one can register and the other can subscribe. */
+/**
+ * Two instances are the same object, so one can register and the other can
+ * subscribe, and the convenience functions reach the same subscribers.
+ */
 export async function shareOneRegistry(): Promise<{ sameInstance: boolean; received: string[] }> {
   const received: string[] = [];
 
@@ -58,6 +61,7 @@ export async function shareOneRegistry(): Promise<{ sameInstance: boolean; recei
   });
 
   await producer.emit('orderPlaced', 'order-1');
+  await emit('orderPlaced', 'order-2'); // convenience function, same registry
 
   return { sameInstance: producer === consumer, received };
 }

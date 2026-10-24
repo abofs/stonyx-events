@@ -93,20 +93,24 @@ export async function isolateHandlerErrors(): Promise<string[]> {
 }
 
 /** clear() drops every subscriber of one event; the event stays registered. */
-export async function clearEvent(): Promise<{ calls: number; canResubscribe: boolean }> {
+export async function clearEvent(): Promise<{ afterClear: number; afterResubscribe: number }> {
   let calls = 0;
+  const count = (): void => {
+    calls++;
+  };
 
   setup(['dataChange']);
-  subscribe('dataChange', () => calls++);
-  subscribe('dataChange', () => calls++);
+  subscribe('dataChange', count);
+  subscribe('dataChange', () => count());
 
   clear('dataChange');
   await emit('dataChange');
+  const afterClear = calls;
 
-  const stop = subscribe('dataChange', () => {}); // still registered, so this does not throw
-  stop();
+  subscribe('dataChange', count); // still registered, so subscribing again works
+  await emit('dataChange');
 
-  return { calls, canResubscribe: true };
+  return { afterClear, afterResubscribe: calls };
 }
 
 /** reset() drops every subscriber and every registration, e.g. between tests. */
