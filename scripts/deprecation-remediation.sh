@@ -10,7 +10,7 @@
 #   are and sees the same warning again — a closed loop.
 #
 # WHAT THIS SCRIPT DOES NOT DO
-#   It does NOT touch any dist-tag. Per the CTO decision on issue #23 (option 2
+#   It does NOT touch any dist-tag. Per the decision recorded on issue #23 (option 2
 #   only), `latest` stays at 0.1.0. Advancing it is deferred to a gated follow-up,
 #   and must happen for @stonyx/cron and @stonyx/events together or not at all.
 #   There is no `npm dist-tag` call anywhere in this file.

@@ -5,6 +5,7 @@
 - QUnit module: `[Unit] Events`
 - 17 test cases in `events-test.ts`; `sample-test.ts` and `sample-surface-test.ts` cover the canonical usage samples (see `docs/project-structure.md`, Canonical Usage Samples)
 - Each test calls `events.reset()` before and after
+- No Stonyx setup is needed: the module has no config and no lifecycle hooks
 
 ## Test Patterns
 
